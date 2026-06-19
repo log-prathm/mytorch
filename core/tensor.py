@@ -1,7 +1,8 @@
+from random.distributions import randn
+
 class Tensor:
-    def __init__(self, lst):
-        self.Tensor = lst
-        # self.shape = self.size()
+    def __init__(self, data=[]):
+        self.Tensor = data
 
     def __call__(self):
         return self.Tensor
@@ -76,9 +77,18 @@ class Tensor:
         return Tensor(result_data)
 
     def __radd__(self, other):
+        """
+            3 + x -> int.__add__(x) won't work because x isn't int.
+            so radd does 3 + x => x + 3
+            so x.__add__(3) will workout
+        """
         return self + other
 
     def _broadcast_like(self, template, value):
+        """
+            If does -> Tensor([[1, 2], [3, 4]]) + 10
+            converting 10 into [[10, 10], [10, 10]] so the addition works out
+        """
         if not isinstance(template, list):
             return value
         return [self._broadcast_like(template[0], value) for _ in template]
@@ -120,6 +130,10 @@ class Tensor:
             return Tensor(result)
         
         return result
+    
+    def randn(self, size: tuple) -> 'Tensor':
+        return Tensor(randn(size))
+
 if "__main__" == __name__: 
     app = Tensor([[1,2,3], [2,3,4]])
     print(app[0])
