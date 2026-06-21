@@ -1,4 +1,5 @@
 from random.distributions import randn
+from math import tanh
 
 class Tensor:
     def __init__(self, data, _parent=()):
@@ -89,7 +90,7 @@ class Tensor:
             result_data,
             (self, other) if isinstance(other, Tensor) else (self,)
         )
-        def _backward():
+        def _backward(): # supports multivariate
             self.grad = self._elementwise_op(
                 self.grad,
                 out.grad,
@@ -149,19 +150,37 @@ class Tensor:
             result_data,
             (self, other) if isinstance(other, Tensor) else (self, )
         )
-        def _backward():
+        def _backward(): ### Implemented with consideration for multivariate calculus
+            # dL/dself += other * out.grad
+            contrib_self = self._elementwise_op(
+                other.data,
+                out.grad,
+                lambda x, y: x*y
+            )
+
             self.grad = self._elementwise_op(
                 self.grad,
-                self._elementwise_op(
-                    other.data, out.grad,
+                contrib_self,
+                lambda a, b: a + b
+            )
+
+            if isinstance(other, Tensor):
+
+                #dL/dother += self * out.grad
+                contrib_other = self._elementwise_op(
+                    self.data,
+                    out.grad,
                     lambda x, y: x*y
-                ),
-                lambda g, ng: g+ng
-            )  
+                )
 
+                other.grad = self._elementwise_op(
+                    other.grad,
+                    contrib_other,
+                    lambda a,b: a+b
+                )
         out._backward = _backward
-
         return out  
+    
     def __pow__(self, exponent: int):
         """return Tensor powered"""
 
@@ -208,6 +227,48 @@ class Tensor:
 
         for node in reversed(topo):
             node._backward()
+
+    def _tanh(self):
+        if not isinstance(self, list):
+            return tanh(self.data)
+        return []
+    
+    def _recursive_sun(self, data):
+        if not isinstance(data, list):
+            return data
+
+        return sum(
+            self._recursive_sum(x)
+            for x in data
+        )
+
+    def sum(self):
+
+        result = self._elementwise_op(
+            self.data
+        )
+
+        out = Tensor(
+            result,
+            (self,)
+        )
+
+        def _backward():
+
+            broadcast_grad = self._broadcast_like(
+                self.data,
+                out.grad
+            )
+
+            self.grad = self.elementwise_op(
+                self.grad,
+                broadcast_grad,
+                lambda a, b: a+b
+            )
+            
+        out._backward = _backward
+
+        return out
 
 if "__main__" == __name__: 
     app = Tensor([[1,2,3], [2,3,4]])
