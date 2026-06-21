@@ -1,2 +1,2 @@
-from .perceptron import Perceptron
+from .nn import Perceptron
 from .loss.square import Square
