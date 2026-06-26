@@ -147,8 +147,9 @@ class Tensor:
         )
         def _backward(): ### Implemented with consideration for multivariate calculus
             # dL/dself += other * out.grad
+            other_value = other.data if isinstance(other, Tensor) else other
             contrib_self = self._elementwise_op(
-                other.data,
+                self._broadcast_like(out.grad, other_value),
                 out.grad,
                 lambda x, y: x*y
             )

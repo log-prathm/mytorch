@@ -2,7 +2,7 @@ from core.tensor import Tensor
 import argparse
 from nn.loss import mse
 from nn import Layer
-
+from nn import SGD
 
 def main():
 
@@ -29,8 +29,13 @@ def main():
 
 if __name__ == "__main__":
     x = Tensor([x for x in range(10)])
-    y = ([2*y for y in range(10)])
+    y = Tensor([2*y for y in range(10)])
+    print(x, y)
     model = Layer(1, 1)
+    optim = SGD(
+        model.parameters(),
+        lr=0.01
+    )
     epochs = 10
     model.zero_grad()
     train_data = zip(x,y)
@@ -42,7 +47,12 @@ if __name__ == "__main__":
             y_preds = model(X)
 
             loss = mse(y_preds, Y)
+            optim.zero_grad()
             loss.backward()
+            optim.step()
 
         print(loss)
     print(f'model parameters after: {model.parameters()}')
+
+    for i in x:
+        print(model(i))
