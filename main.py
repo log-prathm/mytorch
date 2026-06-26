@@ -25,8 +25,6 @@ def main():
     else:
         print(f"No seed was provided, using default seed value of 42")
 
-    print(uniform(seed=args.seed))
-
 if __name__ == "__main__":
     x = Tensor([x for x in range(10)])
     y = Tensor([2*y for y in range(10)])
