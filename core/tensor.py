@@ -233,7 +233,7 @@ class Tensor:
             return tanh(self.data)
         return []
     
-    def _recursive_sun(self, data):
+    def _recursive_sum(self, data):
         if not isinstance(data, list):
             return data
 
@@ -242,6 +242,13 @@ class Tensor:
             for x in data
         )
 
+    # helper
+    def _map(self, data, fn):
+        if not isinstance(data, list):
+            return fn(data)
+                
+        return [self._map(x, fn) for x in data]
+    
     def sum(self):
 
         result = self._elementwise_op(
@@ -266,6 +273,39 @@ class Tensor:
                 lambda a, b: a+b
             )
             
+        out._backward = _backward
+
+        return out
+    
+    def relu(self):
+        result  = self._map(
+            self.data,
+            lambda x: x if x > 0 else 0
+        )
+
+        out = Tensor(
+            result,
+            (self,)
+        )
+
+        def _backward():
+            local_grad = self._map(
+                out.data,
+                lambda y: 1 if y > 0 else 0
+            )
+
+            contrib = self._elementwise_op(
+                local_grad,
+                out.grad,
+                lambda x, y: x*y
+            )
+
+            self.grad = self._elementwise_op(
+                self.grad,
+                contrib,
+                lambda a, b: a + b
+            )
+
         out._backward = _backward
 
         return out
