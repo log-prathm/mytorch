@@ -2,10 +2,10 @@ from random.distributions import randn
 from math import tanh
 
 class Tensor:
-    def __init__(self, data, _parent=()):
+    def __init__(self, data, _children=()):
         self.data = data
         self._backward = lambda: None
-        self._prev = set(_parent)
+        self._prev = set(_children)
         self.grad = self._zeros_like(data)
 
     def __call__(self):
@@ -50,21 +50,13 @@ class Tensor:
             return other.data
         return other
     
+    def __neg__(self):
+        """Handles (-other) used in __sub__"""
+        return self * -1
+    
     def __sub__(self, other: 'Tensor') -> 'Tensor':
-        """Handles element wise Tensor substraction"""
-        other_data = self._scalar_or_Tensor(other)
-        if isinstance(other, Tensor) and self.shape != other.shape:
-            raise ValueError(f"Shape mismatch: cannot substract: {self.shape} and {other.shape}")
-
-        if not isinstance(other_data, list):
-            result_data = self._elementwise_op(self.data, self._broadcast_like(self.data, other_data), lambda x, y: x - y)
-        else:
-            result_data = self._elementwise_op(self.data, other_data, lambda x, y: x-y)
-        out = Tensor(
-            result_data,
-            (self, other) if isinstance(other, Tensor) else (self, )
-        )
-        return out
+        """Handles element wise Tensor substraction by using a.__add__(-b)"""
+        return self + (-other)
     
     def __add__(self, other: 'Tensor') -> 'Tensor':
         """Handles element wise Tensor addition"""
@@ -114,6 +106,9 @@ class Tensor:
             so x.__add__(3) will workout
         """
         return self + other
+    
+    def __rsub__(self, other):
+        return self + (-other)
 
     def _broadcast_like(self, template, value):
         """
@@ -186,7 +181,34 @@ class Tensor:
 
         result_data = self._elementwise_op(self.data, self.data, lambda x, y: x**exponent)
 
-        return result_data
+        out = Tensor(
+            result_data,
+            (self,)
+        )
+
+        def _backward():
+
+            local_grad = self._elementwise_op(
+                self.data,
+                self.data,
+                lambda x, _: exponent * (x ** (exponent - 1))
+            )
+
+            contrib = self._elementwise_op(
+                local_grad,
+                out.grad,
+                lambda a,b: a*b
+            )
+
+            self.grad = self._elementwise_op(
+                self.grad,
+                contrib,
+                lambda a,b: a+b
+            )
+        
+        out._backward = _backward
+
+        return out
 
     def __rmul__(self, other):
         return self * other
@@ -249,33 +271,6 @@ class Tensor:
                 
         return [self._map(x, fn) for x in data]
     
-    def sum(self):
-
-        result = self._elementwise_op(
-            self.data
-        )
-
-        out = Tensor(
-            result,
-            (self,)
-        )
-
-        def _backward():
-
-            broadcast_grad = self._broadcast_like(
-                self.data,
-                out.grad
-            )
-
-            self.grad = self.elementwise_op(
-                self.grad,
-                broadcast_grad,
-                lambda a, b: a+b
-            )
-            
-        out._backward = _backward
-
-        return out
     
     def relu(self):
         result  = self._map(
@@ -309,7 +304,60 @@ class Tensor:
         out._backward = _backward
 
         return out
+    
+    def numel(self):
 
+        result = self._elementwise_op(
+            self.data
+        )
+
+        out = Tensor(
+            result,
+            (self,)
+        )
+
+        def _backward():
+
+            broadcast_grad = self._broadcast_like(
+                self.data,
+                out.grad
+            )
+
+            self.grad = self.elementwise_op(
+                self.grad,
+                broadcast_grad,
+                lambda a, b: a+b
+            )
+            
+        out._backward = _backward
+
+        return out
+    
+    def sum(self):
+        
+        out = Tensor(
+            self._recursive_sum(self.data),
+            (self,)
+            )
+    
+        def _backward():
+            contrib = self._broadcast_like(
+                self.data,
+                out.grad
+            )
+
+            self.grad = self._elementwise_op(
+                self.grad,
+                contrib,
+                lambda old, new: old + new
+            )
+        out._backward = _backward
+
+        return out
+    
+    def mean(self):
+        return self.sum() / self.numel()
+    
 if "__main__" == __name__: 
     app = Tensor([[1,2,3], [2,3,4]])
     print(app[0])

@@ -1,10 +1,7 @@
 from core.tensor import Tensor
-from nn import Perceptron
-from nn.loss.square import Square 
-from random import uniform
-from random import randint
 import argparse
-from random import randn
+from nn.loss import mse
+from nn import Layer
 
 
 def main():
@@ -31,13 +28,21 @@ def main():
     print(uniform(seed=args.seed))
 
 if __name__ == "__main__":
+    x = Tensor([x for x in range(10)])
+    y = ([2*y for y in range(10)])
+    model = Layer(1, 1)
+    epochs = 10
+    model.zero_grad()
+    train_data = zip(x,y)
+    print(f"model para before: {model.parameters()}")
 
+    for epoch in range(epochs):
 
-    a = Tensor([[2,3]])
-    b = Tensor([[4,5]])
+        for X, Y in train_data:
+            y_preds = model(X)
 
-    c = a * b
-    
-    c.backward()
+            loss = mse(y_preds, Y)
+            loss.backward()
 
-    print(a.grad)
+        print(loss)
+    print(f'model parameters after: {model.parameters()}')
