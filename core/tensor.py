@@ -1,4 +1,4 @@
-from random.distributions import randn
+from mytorch.random.distributions import randn
 from math import tanh
 
 class Tensor:
@@ -148,14 +148,19 @@ class Tensor:
         def _backward(): ### Implemented with consideration for multivariate calculus
             # dL/dself += other * out.grad
             other_value = other.data if isinstance(other, Tensor) else other
-            contrib_self = self._elementwise_op(
-                self._broadcast_like(out.grad, other_value),
+            other_grad_value = (
+                other_value
+                if isinstance(other_value, list)
+                else self._broadcast_like(out.grad, other_value)
+            )
+            contrib_self = self._elementwise_op( # dL/dself = other * out
+                other_grad_value, # other.data in suitable shape
                 out.grad,
                 lambda x, y: x*y
             )
 
-            self.grad = self._elementwise_op(
-                self.grad,
+            self.grad = self._elementwise_op( # <-- this line provides += operation
+                self.grad, # initially set to zero by _zero_like 
                 contrib_self,
                 lambda a, b: a + b
             )
@@ -163,9 +168,14 @@ class Tensor:
             if isinstance(other, Tensor):
 
                 #dL/dother += self * out.grad
+                out_grad = (
+                    out.grad
+                    if isinstance(out.grad, list)
+                    else self._broadcast_like(self.data, out.grad)
+                )
                 contrib_other = self._elementwise_op(
                     self.data,
-                    out.grad,
+                    out_grad,
                     lambda x, y: x*y
                 )
 

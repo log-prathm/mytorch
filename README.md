@@ -10,6 +10,16 @@ The network implementation is based on Andrej Karpathy's implementation of micro
 
 So it follows a graph struct(Computational graph) approach instead of network approach(used in nn playground)
 
+In this approach, the gradient is TRANSFERED(transfered or propogated backwards) via operations for a parameter until the grad of that parameter is updated.
+
+karpathy's approach is more like how the gradients of both operands change while performing a particular operation like addition and multiplication.
+
+NN playgrouds approach is more formulatic and hard coded. We even require the derivate of the activation to be specified. 
+Same is not true with Micrograd. Since activation functions are made up of mathematical operations, there is no need to hard-code it's derivative. 
+
+No need to hardcode doesn't mean that it can't be or shouldn't be done. Manual derivatives are faster/ give more scope for optimization.
+value.tanh implemented by karpathy used manual derivative.
+
 
 |                                | Micrograd          | NN Playground            |
 | ------------------------------ | ------------------ | ------------------------ |

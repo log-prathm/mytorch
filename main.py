@@ -1,8 +1,8 @@
-from core.tensor import Tensor
 import argparse
-from nn.loss import mse
-from nn import Layer
-from nn import SGD
+from .core.tensor import Tensor
+from .nn.loss import mse
+from .nn import Layer
+from .nn import SGD
 
 def main():
 

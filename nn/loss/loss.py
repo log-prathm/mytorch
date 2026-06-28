@@ -1,4 +1,4 @@
-from core.tensor import Tensor
+from ...core.tensor import Tensor
 
 '''
     Loss is not a new kind of Tensor
