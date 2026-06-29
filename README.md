@@ -29,6 +29,34 @@ value.tanh implemented by karpathy used manual derivative.
 | Backward                       | call `_backward()` | apply backprop equations |
 | Graph changes every expression | fixed after build  |                          |
 
+# Build guide
+
+### Requirement
+```bash
+pip install build
+```
+
+### Build wheel and source distribution
+```bash
+python -m build
+```
+
+### Install wheel locally
+
+Bash / Git Bash / macOS / Linux:
+
+```bash
+pip install dist/*.whl
+```
+
+OR
+
+```bash
+pip install dist/mytorch-0.1.0-py3-none-any.whl
+```
+
+> [!NOTE]  
+> If you have multiple wheel files in the `dist/` directory, replace `*.whl` with the exact name of the actual wheel file you want to install.
 
 ---
 log-prathm

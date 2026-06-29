@@ -1,8 +1,8 @@
 import argparse
-from .core.tensor import Tensor
-from .nn.loss import mse
-from .nn import Layer
-from .nn import SGD
+from mytorch.core.tensor import Tensor
+from mytorch.nn.loss import mse
+from mytorch.nn import Layer
+from mytorch.nn.optim import SGD
 
 def main():
 

@@ -1,5 +1,27 @@
+# Python cache files
 __pycache__/
 *.py[cod]
 
-test.py
-.agents
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Test and coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local editor / agent files
+.agents/
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
