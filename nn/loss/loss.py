@@ -6,7 +6,11 @@ from ...core.tensor import Tensor
 '''
 
 def mse(preds: Tensor, target: Tensor) -> Tensor:
-
+    if isinstance(preds, list):
+        lst = []
+        for entry in preds:
+            lst.append(entry.data)
+        preds = Tensor(lst)
     return ((preds - target) ** 2).sum()
 
 # def mae(preds: Tensor, target: Tensor) -> Tensor:

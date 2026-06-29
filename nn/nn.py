@@ -29,10 +29,10 @@ class Neuron(Module):
 
     def __call__(self, x):
 
-        # if x.shape != self.w.shape:
-        #     raise ValueError(
-        #         f"Expected {self.w.shape}, got {x.shape}"
-        #     )
+        if x.shape != self.w.shape:
+            raise ValueError(
+                f"Expected {self.w.shape}, got {x.shape}"
+            )
 
         out = (x * self.w).sum() + self.b
         if self.nonlin:
