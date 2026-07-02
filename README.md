@@ -58,5 +58,10 @@ pip install dist/mytorch-0.1.0-py3-none-any.whl
 > [!NOTE]  
 > If you have multiple wheel files in the `dist/` directory, replace `*.whl` with the exact name of the actual wheel file you want to install.
 
+## Editable Build Mode for Active Testing
+```bash
+pip install -e .
+```
+
 ---
 log-prathm

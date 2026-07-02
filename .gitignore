@@ -16,11 +16,13 @@ htmlcov/
 .venv/
 venv/
 env/
+.vscode
 
 # Local editor / agent files
 .agents/
 .vscode/
 .idea/
+.codex
 
 # OS files
 .DS_Store

@@ -36,6 +36,11 @@ class Tensor:
             current = current[0]
         return tuple(dims)
     
+    def __getitem__(self, key):
+        result = self.data[key]
+
+        return Tensor(result)
+
     def _elementwise_op(self, a, b, op):
         """Recursively applies element wise operations on two Tensors"""
 
@@ -187,6 +192,9 @@ class Tensor:
         out._backward = _backward
         return out  
     
+    def __truediv__(self, other):
+        return self * (other**-1)
+    
     def __pow__(self, exponent: int):
         """return Tensor powered"""
 
@@ -317,32 +325,14 @@ class Tensor:
         return out
     
     def numel(self):
-
-        result = self._elementwise_op(
-            self.data
-        )
-
-        out = Tensor(
-            result,
-            (self,)
-        )
-
-        def _backward():
-
-            broadcast_grad = self._broadcast_like(
-                self.data,
-                out.grad
-            )
-
-            self.grad = self.elementwise_op(
-                self.grad,
-                broadcast_grad,
-                lambda a, b: a+b
-            )
-            
-        out._backward = _backward
-
-        return out
+        
+        def _sum(data):
+            if not isinstance(data, list):
+                return 1
+            return sum(_sum(idx) for idx in data)
+        return _sum(self.data)
+    
+    # For practice, you can implement numemul(multiply each int), numesub, numeaddpow etc etc 
     
     def sum(self):
         
@@ -371,4 +361,4 @@ class Tensor:
     
 if "__main__" == __name__: 
     app = Tensor([[1,2,3], [2,3,4]])
-    print(app[0])
+    print(app[0], app[0][0], app[0][1:])
